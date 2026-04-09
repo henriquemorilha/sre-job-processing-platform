@@ -5,7 +5,7 @@ import random
 from datetime import datetime, UTC
 
 # força conexão local
-r = redis.Redis(host="127.0.0.1", port=6379, decode_responses=True)
+r = redis.Redis(host="redis", port=6379, decode_responses=True)
 
 
 def now():
