@@ -1,68 +1,47 @@
-import redis
+import logging
 import time
-import json
-import random
-from datetime import datetime, UTC
+import redis
+from prometheus_client import Counter, start_http_server
 
-# força conexão local
-r = redis.Redis(host="redis", port=6379, decode_responses=True)
+# Configuração de logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s: %(message)s"
+)
 
+# Conexão com Redis
+redis_client = redis.Redis(host="sre-redis", port=6379, db=0)
 
-def now():
-    return datetime.now(UTC).isoformat()
+# Métricas customizadas
+jobs_created = Counter("jobs_created_total", "Total de jobs criados")
+jobs_completed = Counter("jobs_completed_total", "Total de jobs completados")
+jobs_failed = Counter("jobs_failed_total", "Total de jobs falhados")
 
+# Expor métricas na porta 8001
+start_http_server(8001, addr="0.0.0.0")
 
-def process_job(job):
-    time.sleep(2)
-
-    if random.random() < 0.3:
-        raise Exception("Random processing failure")
-
-
-print("🚀 Worker started...")
-
-while True:
-    print("⏳ Waiting for job...")
-
-    result = r.brpop("queue", timeout=5)
-
-    if not result:
-        print("⚠️ No job found in queue...")
-        continue
-
-    _, job_data = result
-    job = json.loads(job_data)
-
-    job_id = job["id"]
-
-    print(f"📥 Job received: {job_id}")
-
+def process_job(job_id):
+    logging.info(f"Consumindo job {job_id}")
+    jobs_created.inc()
     try:
-        job["status"] = "processing"
-        job["updated_at"] = now()
-        r.set(job_id, json.dumps(job))
-
-        process_job(job)
-
-        job["status"] = "completed"
-        job["updated_at"] = now()
-        job["error"] = None
-
-        print(f"✅ Job completed: {job_id}")
-
-        r.set(job_id, json.dumps(job))
-
+        # Simula processamento
+        time.sleep(2)
+        redis_client.set(f"job:{job_id}:status", "completed")
+        jobs_completed.inc()
+        logging.info(f"Job {job_id} concluído com sucesso")
     except Exception as e:
-        job["attempts"] += 1
-        job["error"] = str(e)
-        job["updated_at"] = now()
+        redis_client.set(f"job:{job_id}:status", "failed")
+        jobs_failed.inc()
+        logging.error(f"Falha ao processar job {job_id}: {e}")
 
-        print(f"❌ Job failed: {job_id} | Attempt {job['attempts']}")
-
-        if job["attempts"] < job["max_attempts"]:
-            job["status"] = "retrying"
-            r.lpush("queue", json.dumps(job))
+def main():
+    while True:
+        logging.info("Esperando job...")
+        job_id = redis_client.rpop("job_queue")
+        if job_id:
+            process_job(job_id.decode("utf-8"))
         else:
-            job["status"] = "failed"
-            r.set(job_id, json.dumps(job))
-            print(f"💀 Job permanently failed: {job_id}")
+            time.sleep(1)
+
+if __name__ == "__main__":
+    main()

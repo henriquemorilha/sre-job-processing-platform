@@ -1,0 +1,17 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: sre-api-service-monitor
+  labels:
+    release: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: sre-api
+  namespaceSelector:
+    matchNames:
+      - default   # ou "sre" se você criar namespace próprio
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s

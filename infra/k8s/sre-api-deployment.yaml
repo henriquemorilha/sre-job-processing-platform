@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sre-api
+  namespace: sre
+  labels:
+    app: sre-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sre-api
+  template:
+    metadata:
+      labels:
+        app: sre-api
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+      - name: sre-api
+        image: henriquemorilha/sre-api:latest
+        ports:
+        - containerPort: 8000
