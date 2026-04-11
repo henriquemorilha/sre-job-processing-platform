@@ -14,11 +14,8 @@ redis_url = os.getenv("REDIS_URL")
 if redis_url:
     redis_client = redis.Redis.from_url(
         redis_url,
-        decode_responses=True,
-        ssl=True,
-        ssl_cert_reqs="none",
-        socket_connect_timeout=2,
-        socket_timeout=2
+        decode_responses=True
+
     )
 else:
     print("WARNING: REDIS_URL not set")
