@@ -9,19 +9,20 @@ app = FastAPI()
 
 redis_url = os.getenv("REDIS_URL")
 
-if not redis_url:
-    raise ValueError("REDIS_URL not set")
-
-redis_client = redis.from_url(
-    redis_url,
-    decode_responses=True
-)
+if redis_url:
+    redis_client = redis.from_url(redis_url, decode_responses=True)
+else:
+    print("WARNING: REDIS_URL not set")
+    redis_client = None
 
 # Métrica customizada
 jobs_created = Counter("jobs_created_total", "Total de jobs criados")
 
 @app.post("/job")
 def create_job(payload: dict):
+    if not redis_client:
+        return {"error": "Redis not configured"}
+
     job_id = str(uuid.uuid4())
     redis_client.lpush("job_queue", job_id)
     jobs_created.inc()
@@ -29,6 +30,9 @@ def create_job(payload: dict):
 
 @app.get("/status/{job_id}")
 def get_status(job_id: str):
+    if not redis_client:
+        return {"error": "Redis not configured"}
+
     status = redis_client.get(f"job:{job_id}:status")
     if status:
         return {"job_id": job_id, "status": status}
