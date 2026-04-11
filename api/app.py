@@ -10,7 +10,12 @@ app = FastAPI()
 redis_url = os.getenv("REDIS_URL")
 
 if redis_url:
-    redis_client = redis.from_url(redis_url, decode_responses=True)
+    redis_client = redis.from_url(
+        redis_url,
+        decode_responses=True,
+        ssl=True,
+        ssl_cert_reqs=None
+    )
 else:
     print("WARNING: REDIS_URL not set")
     redis_client = None
