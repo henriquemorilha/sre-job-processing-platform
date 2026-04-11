@@ -1,0 +1,21 @@
+name: Deploy to Render
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger API Deploy
+        run: |
+          curl -X POST https://api.render.com/deploy/srv-d7cup6ho3t8c7396m9u0?key=tGqmuWfNuZ4
+
+  deploy-worker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Worker Deploy
+        run: |
+          curl -X POST https://api.render.com/deploy/srv-d7d09g1kh4rs739gb4cg?key=vCfC3N8DpOw
