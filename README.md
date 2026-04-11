@@ -1,30 +1,91 @@
-# 🚀 SRE Job Platform
+# 🚀 SRE Job Processing Platform
 
-A complete **Job Processing Platform** built with **Python, Redis, Kubernetes, Prometheus, and Grafana**.
+> A production-like **distributed job processing system** designed with **observability, scalability, and reliability** at its core.
 
-This project demonstrates how to design, deploy, and monitor a **distributed system with observability at its core**, following SRE and DevOps best practices.
+This project simulates a real-world SRE scenario where services must handle asynchronous workloads, expose meaningful metrics, and operate reliably under a distributed architecture.
 
 ---
 
-## ✨ Features
+## 🧠 Overview
 
-* **Job API**
-  RESTful service to create jobs and enqueue them in Redis
+Modern systems rely heavily on **background job processing** — from payments to notifications and data pipelines.
 
-* **Worker**
-  Background processor that consumes and executes jobs
+This platform demonstrates how to:
 
-* **Redis**
-  Acts as a job queue
+* Design a **decoupled architecture** using queues
+* Process jobs **asynchronously and reliably**
+* Implement **observability-first systems**
+* Deploy and manage services using **Kubernetes**
 
-* **Prometheus**
-  Collects metrics from API and Worker
+---
 
-* **Grafana**
-  Visualizes metrics through dashboards
+## 🏗️ Architecture
 
-* **Kubernetes Deployment**
-  All components run inside a Kubernetes cluster
+```
+        ┌──────────────┐
+        │    Client    │
+        └──────┬───────┘
+               │ HTTP
+               ▼
+        ┌──────────────┐
+        │   Job API    │
+        └──────┬───────┘
+               │ Push job
+               ▼
+        ┌──────────────┐
+        │    Redis     │  ← Queue
+        └──────┬───────┘
+               │ Consume
+               ▼
+        ┌──────────────┐
+        │    Worker    │
+        └──────────────┘
+
+        📊 Metrics → Prometheus → Grafana
+```
+
+---
+
+## ✨ Key Features
+
+### ⚙️ Distributed Job Processing
+
+* API receives jobs and pushes them to Redis
+* Workers consume jobs independently
+* Fully decoupled architecture
+
+### 📊 Observability First
+
+* Metrics exposed via Prometheus
+* Dashboards built in Grafana
+* Tracks:
+
+  * Jobs created
+  * Jobs completed
+  * Jobs failed
+
+### ☸️ Kubernetes Native
+
+* Fully containerized services
+* Deployed with Kubernetes manifests
+* Easy to scale workers horizontally
+
+### 🔄 Scalable by Design
+
+* Workers can be replicated to handle load
+* Queue-based architecture prevents bottlenecks
+
+---
+
+## 🧱 Tech Stack
+
+* **Python (FastAPI)** — API layer
+* **Python Worker** — background processing
+* **Redis** — job queue
+* **Docker** — containerization
+* **Kubernetes** — orchestration
+* **Prometheus** — metrics collection
+* **Grafana** — visualization & dashboards
 
 ---
 
@@ -32,17 +93,17 @@ This project demonstrates how to design, deploy, and monitor a **distributed sys
 
 ```bash
 sre-job-platform/
-├── api/           # Job API service
-├── worker/        # Worker service
+├── api/           # FastAPI service
+├── worker/        # Background job processor
 ├── infra/k8s/     # Kubernetes manifests
-└── README.md      # Documentation
+└── README.md
 ```
 
 ---
 
-## ⚙️ Setup Instructions
+## ⚙️ Getting Started
 
-### 1. Build and Push Docker Images
+### 1. Build & Push Images
 
 ```bash
 cd worker
@@ -64,7 +125,15 @@ kubectl apply -f infra/k8s/
 
 ---
 
-### 3. Restart Deployments (after updates)
+### 3. Verify Deployment
+
+```bash
+kubectl get pods -n sre
+```
+
+---
+
+### 4. Restart Services (if needed)
 
 ```bash
 kubectl rollout restart deploy sre-api -n sre
@@ -73,7 +142,7 @@ kubectl rollout restart deploy sre-worker -n sre
 
 ---
 
-## 📡 Usage
+## 📡 API Usage
 
 ### Create a Job
 
@@ -93,13 +162,29 @@ curl -X POST http://localhost:32507/job \
 
 ---
 
-### Worker Logs
+## 🔍 Monitoring & Observability
 
-```bash
-kubectl logs -n sre -f <worker-pod-name>
-```
+### 📊 Prometheus Metrics
 
-### Expected Output
+* `jobs_created_total`
+* `jobs_completed_total`
+* `jobs_failed_total`
+
+---
+
+### 📈 Grafana Dashboards
+
+Visualize:
+
+* Jobs created per minute
+* Jobs completed per minute
+* Failure rates
+
+➡️ Enables real-time monitoring and alerting strategies
+
+---
+
+## 🧪 Example Worker Logs
 
 ```bash
 INFO: Waiting for job...
@@ -109,35 +194,23 @@ INFO: Job 123e4567-e89b-12d3-a456-426614174000 completed successfully
 
 ---
 
-## 📊 Observability
+## 📌 Future Improvements
 
-### Prometheus
-
-Available metrics:
-
-* `jobs_created_total`
-* `jobs_completed_total`
-* `jobs_failed_total`
+* [ ] Retry mechanism for failed jobs
+* [ ] Dead-letter queue (DLQ)
+* [ ] Advanced alerting in Grafana
+* [ ] Horizontal Pod Autoscaler (HPA)
+* [ ] Load testing scenarios
 
 ---
 
-### Grafana
+## 🎯 What This Project Demonstrates
 
-Dashboards include:
-
-* Jobs created per minute
-* Jobs completed per minute
-* Total failed jobs
-
-You can also configure **alerts for job failures**.
-
----
-
-## 📌 Next Steps
-
-* [ ] Add retry logic for failed jobs
-* [ ] Expand Grafana dashboards with alerts
-* [ ] Document scaling strategies for worker replicas
+* Real-world **SRE mindset**
+* Observability-driven development
+* Distributed systems fundamentals
+* Kubernetes-based deployments
+* Scalable job processing architecture
 
 ---
 
@@ -146,20 +219,13 @@ You can also configure **alerts for job failures**.
 **Henrique Morilha**
 
 IT Specialist | Mainframe Operations & Infrastructure
-SRE & DevOps Practices | Automation & Observability
+SRE | DevOps | Automation | Observability
 
 📍 Brazil
-🔗 LinkedIn: https://www.linkedin.com/in/hmorilha/
+🔗 https://www.linkedin.com/in/hmorilha/
 
 ---
 
-## ⭐ About This Project
+## ⭐ Final Note
 
-This project was built to demonstrate **real-world SRE concepts**, including:
-
-* Distributed job processing
-* Observability-first architecture
-* Containerization and orchestration
-* Scalable system design
-
----
+This is not just a demo — it's a **practical representation of how modern backend systems are designed and operated in production environments**.
