@@ -15,7 +15,6 @@ if redis_url:
     redis_client = redis.Redis.from_url(
         redis_url,
         decode_responses=True
-
     )
 else:
     print("WARNING: REDIS_URL not set")
@@ -23,6 +22,19 @@ else:
 
 # Métrica customizada
 jobs_created = Counter("jobs_created_total", "Total de jobs criados")
+
+@app.get("/")
+def root():
+    return {
+        "message": "SRE Job Processing Platform is running 🚀",
+        "endpoints": [
+            "/job (POST)",
+            "/status/{job_id}",
+            "/health",
+            "/debug",
+            "/metrics"
+        ]
+    }
 
 @app.post("/job")
 def create_job(payload: dict):
