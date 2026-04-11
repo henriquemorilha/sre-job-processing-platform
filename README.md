@@ -219,7 +219,7 @@ INFO: Job 123e4567-e89b-12d3-a456-426614174000 completed successfully
 **Henrique Morilha**
 
 IT Specialist | Mainframe Operations & Infrastructure
-SRE | DevOps | Automation | Observability
+| SRE & DevOps Practices | Automation & Observability
 
 📍 Brazil
 🔗 https://www.linkedin.com/in/hmorilha/
