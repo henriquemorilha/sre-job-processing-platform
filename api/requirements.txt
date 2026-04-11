@@ -1,4 +1,5 @@
 fastapi
 uvicorn
-redis
+redis>=5.0.0
 prometheus-fastapi-instrumentator
+prometheus-client
