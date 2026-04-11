@@ -7,14 +7,18 @@ import os
 
 app = FastAPI()
 
+# Pega variável de ambiente
 redis_url = os.getenv("REDIS_URL")
 
+# Conexão com Redis (Upstash - com SSL + timeout)
 if redis_url:
-    redis_client = redis.from_url(
+    redis_client = redis.Redis.from_url(
         redis_url,
         decode_responses=True,
         ssl=True,
-        ssl_cert_reqs=None
+        ssl_cert_reqs="none",
+        socket_connect_timeout=2,
+        socket_timeout=2
     )
 else:
     print("WARNING: REDIS_URL not set")
@@ -28,9 +32,22 @@ def create_job(payload: dict):
     if not redis_client:
         return {"error": "Redis not configured"}
 
+    try:
+        # Testa conexão
+        print("PING:", redis_client.ping())
+    except Exception as e:
+        print("REDIS ERROR:", str(e))
+        return {"error": str(e)}
+
     job_id = str(uuid.uuid4())
-    redis_client.lpush("job_queue", job_id)
-    jobs_created.inc()
+
+    try:
+        redis_client.lpush("job_queue", job_id)
+        jobs_created.inc()
+    except Exception as e:
+        print("LPUSH ERROR:", str(e))
+        return {"error": str(e)}
+
     return {"job_id": job_id}
 
 @app.get("/status/{job_id}")
@@ -38,9 +55,14 @@ def get_status(job_id: str):
     if not redis_client:
         return {"error": "Redis not configured"}
 
-    status = redis_client.get(f"job:{job_id}:status")
+    try:
+        status = redis_client.get(f"job:{job_id}:status")
+    except Exception as e:
+        return {"error": str(e)}
+
     if status:
         return {"job_id": job_id, "status": status}
+
     return {"job_id": job_id, "status": "not_found"}
 
 @app.get("/health")
@@ -51,5 +73,5 @@ def health():
 def debug():
     return {"redis_url": redis_url}
 
-# Instrumentação Prometheus
+# Prometheus
 Instrumentator().instrument(app).expose(app)
