@@ -224,7 +224,7 @@ IT Specialist | Mainframe Operations & Infrastructure
 📍 Brazil
 🔗 https://www.linkedin.com/in/hmorilha/
 
----
+---.
 
 # ⭐ Final Note
 
